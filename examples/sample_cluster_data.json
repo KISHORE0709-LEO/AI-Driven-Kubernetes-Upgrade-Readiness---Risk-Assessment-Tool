@@ -1,0 +1,126 @@
+{
+  "cluster_info": {
+    "kubernetes_version": "v1.25.16",
+    "api_server_version": "v1.25.16",
+    "managed_cluster": true,
+    "ha_topology": "3 control plane / 6 workers",
+    "node_versions": ["v1.25.15", "v1.25.15", "v1.25.15", "v1.25.15"],
+    "os_versions": ["Ubuntu 22.04.4 LTS", "Ubuntu 22.04.4 LTS"],
+    "container_runtime": "containerd",
+    "runtime_version": "1.7.11",
+    "node_upgrade_ready": false
+  },
+  "workloads": [
+    {
+      "namespace": "prod",
+      "kind": "Deployment",
+      "name": "payments-api",
+      "api_version": "apps/v1",
+      "criticality": "high",
+      "restart_history": "2 restarts in 7d"
+    },
+    {
+      "namespace": "monitoring",
+      "kind": "StatefulSet",
+      "name": "prometheus",
+      "api_version": "apps/v1",
+      "criticality": "high",
+      "restart_history": "1 restart in 2d"
+    },
+    {
+      "namespace": "ops",
+      "kind": "CustomResource",
+      "name": "example-cr",
+      "api_version": "example.com/v1beta1",
+      "criticality": "medium",
+      "restart_history": "not applicable"
+    }
+  ],
+  "crds": [
+    {
+      "name": "prometheuses.monitoring.coreos.com",
+      "group": "monitoring.coreos.com",
+      "kind": "Prometheus",
+      "api_versions": ["v1", "v1alpha1"],
+      "served_versions": ["v1"],
+      "storage_version": "v1",
+      "conversion_strategy": "None",
+      "conversion_webhook": false,
+      "validation_schema": "Structural",
+      "api_compatibility": "pass",
+      "remarks": "Prometheus operator is 1-2 releases behind target Kubernetes support."
+    },
+    {
+      "name": "examplecrds.example.com",
+      "group": "example.com",
+      "kind": "ExampleCR",
+      "api_versions": ["v1beta1", "v1"],
+      "served_versions": ["v1beta1"],
+      "storage_version": "v1beta1",
+      "conversion_strategy": "None",
+      "conversion_webhook": false,
+      "validation_schema": "Unknown",
+      "api_compatibility": "warning",
+      "remarks": "CRD still serves deprecated v1beta1 and stores objects in the beta version."
+    }
+  ],
+  "controllers": [
+    {
+      "name": "cert-manager",
+      "version": "v1.12.2",
+      "supported_kubernetes_versions": ["1.24-1.28"],
+      "status": "warning",
+      "upgrade_required": "before upgrade",
+      "notes": "Target cluster version is outside the fully supported range for the current release."
+    },
+    {
+      "name": "ingress-nginx",
+      "version": "v1.8.1",
+      "supported_kubernetes_versions": ["1.25-1.29"],
+      "status": "pass",
+      "upgrade_required": "optional",
+      "notes": "Compatible with target range."
+    },
+    {
+      "name": "prometheus-operator",
+      "version": "v0.69.1",
+      "supported_kubernetes_versions": ["1.23-1.27"],
+      "status": "high-risk",
+      "upgrade_required": "before upgrade",
+      "notes": "Operator is not validated for Kubernetes 1.29 and may stop reconciling."
+    }
+  ],
+  "admission_webhooks": [
+    {
+      "name": "policy-webhook.example.com",
+      "kind": "ValidatingWebhookConfiguration",
+      "failure_policy": "Fail",
+      "tls_ready": true,
+      "version_support": "v1",
+      "status": "warning",
+      "notes": "Webhook has a strict failure policy and may block admission if API compatibility changes."
+    }
+  ],
+  "networking": {
+    "status": "warning",
+    "notes": "Ingress controller and CoreDNS are both near their current compatibility ceiling; DNS and LB behavior should be validated during cutover."
+  },
+  "storage": {
+    "status": "high-risk",
+    "notes": "CSI driver versions and snapshot support are not confirmed for the target Kubernetes version."
+  },
+  "security": {
+    "status": "warning",
+    "notes": "Pod Security Admission is enabled and several workloads require elevated controls."
+  },
+  "runtime": {
+    "status": "pass",
+    "container_runtime": "containerd",
+    "runtime_version": "1.7.11",
+    "notes": "Container runtime is current enough for support."
+  },
+  "resource_pressure": {
+    "status": "warning",
+    "notes": "Cluster is CPU constrained and may experience evictions during drain operations."
+  }
+}
